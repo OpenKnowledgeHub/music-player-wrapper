@@ -47,8 +47,32 @@ class TrackTest {
     @DisplayName("Should not create a track without name content")
     public void testCreateTrackWithoutNameContent() {
       assertThatThrownBy(() -> new Track(testTrackId, ""))
-              .isInstanceOf(DisterException.class)
-              .hasMessage("'name' must not be blank");
+          .isInstanceOf(DisterException.class)
+          .hasMessage("'name' must not be blank");
+    }
+  }
+
+  @Nested
+  @DisplayName("Test equality and hash code")
+  public class TestEqualityAndHashCode {
+    @Test
+    @DisplayName("Should be equal and same hash code with same id")
+    public void testEquals() {
+      final var trackOne = new Track(new EntityId("track:1234"), testTrackName);
+      final var trackTwo = new Track(new EntityId("track:1234"), testTrackName + "2");
+
+      assertThat(trackOne).isEqualTo(trackTwo);
+      assertThat(trackOne.hashCode()).isEqualTo(trackTwo.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should not be equal and differ hash code with different id")
+    public void testNotEquals() {
+      final var trackOne = new Track(new EntityId("track:1234"), testTrackName);
+      final var trackTwo = new Track(new EntityId("track:4567"), testTrackName);
+
+      assertThat(trackOne).isNotEqualTo(trackTwo);
+      assertThat(trackOne.hashCode()).isNotEqualTo(trackTwo.hashCode());
     }
   }
 }

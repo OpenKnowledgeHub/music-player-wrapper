@@ -228,4 +228,37 @@ class PlayerTest {
       assertThat(playerWithoutActiveDevice.id()).isEqualTo(testPlayerId);
     }
   }
+
+  @Nested
+  @DisplayName("Test equality and hash code")
+  public class TestEqualityAndHashCode {
+    @Test
+    @DisplayName("Should be equal and same hash code with same id")
+    public void testEquals() {
+      final var playerOne =
+          new Player(new EntityId("player:1234"), testPlayerName, true, testDevice, testTrack);
+      final var playerTwo =
+          new Player(
+              new EntityId("player:1234"),
+              testPlayerName + "2",
+              false,
+              new Device(new EntityId("device:4567"), "Device", true),
+              new Track(new EntityId("entity:789"), "Track"));
+
+      assertThat(playerOne).isEqualTo(playerTwo);
+      assertThat(playerOne.hashCode()).isEqualTo(playerTwo.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should not be equal and differ hash code with different id")
+    public void testNotEquals() {
+      final var playerOne =
+          new Player(new EntityId("player:1234"), testPlayerName, true, testDevice, testTrack);
+      final var playerTwo =
+          new Player(new EntityId("player:4567"), testPlayerName, true, testDevice, testTrack);
+
+      assertThat(playerOne).isNotEqualTo(playerTwo);
+      assertThat(playerOne.hashCode()).isNotEqualTo(playerTwo.hashCode());
+    }
+  }
 }
