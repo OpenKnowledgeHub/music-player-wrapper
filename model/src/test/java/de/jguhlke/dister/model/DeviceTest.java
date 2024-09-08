@@ -11,8 +11,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DisplayName("Test Device entity")
 class DeviceTest {
 
-  private EntityId testDeviceId = new EntityId("device:1234");
-  private String testDeviceName = "Kitchen";
+  final EntityId testDeviceId = new EntityId("device:1234");
+  final String testDeviceName = "Kitchen";
 
   @Nested
   @DisplayName("Test Device creation")
