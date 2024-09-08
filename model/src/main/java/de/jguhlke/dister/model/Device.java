@@ -2,7 +2,7 @@ package de.jguhlke.dister.model;
 
 import java.util.Objects;
 
-public record Device(DeviceId id, String name, boolean active, Track runningTrack) {
+public record Device(EntityId id, String name, boolean active, Track runningTrack) {
 
     public Device {
         Objects.requireNonNull(id, "'id' needs to be set");

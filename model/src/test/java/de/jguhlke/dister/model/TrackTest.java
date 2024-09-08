@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class TrackTest {
 
   final String testTrackName = "Hello";
-  final TrackId testTrackId = new TrackId("track:1234");
+  final EntityId testTrackId = new EntityId("track:1234");
 
   @Nested
   @DisplayName("Test Track creation")

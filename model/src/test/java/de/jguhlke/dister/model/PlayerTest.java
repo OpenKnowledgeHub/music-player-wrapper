@@ -13,10 +13,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class PlayerTest {
 
   final String testPlayerName = "player";
-  final PlayerId testPlayerId = new PlayerId("player:123");
-  final TrackId testTrackId = new TrackId("track:123");
+  final EntityId testPlayerId = new EntityId("player:123");
+  final EntityId testTrackId = new EntityId("track:123");
   final Track testTrack = new Track(testTrackId, "Song");
-  final DeviceId testDeviceId = new DeviceId("device:123");
+  final EntityId testDeviceId = new EntityId("device:123");
   final Device testDevice = new Device(testDeviceId, "Kitchen Bar", true, testTrack);
 
   @Nested
@@ -40,7 +40,7 @@ class PlayerTest {
     public void testCreateWithoutId() {
       assertThatThrownBy(() -> new Player(null, testPlayerName, false, testDevice, testTrack))
           .isInstanceOf(NullPointerException.class)
-          .hasMessage("'playerId' must be set");
+          .hasMessage("'id' must be set");
     }
 
     @Test
@@ -83,7 +83,7 @@ class PlayerTest {
     @DisplayName("Should play a track")
     public void testPlay() {
       final var player = new Player(testPlayerId, testPlayerName, false, testDevice, null);
-      final var trackId = new TrackId("track:456");
+      final var trackId = new EntityId("track:456");
       final var track = new Track(trackId, "New Song");
 
       final var playingPlayer = player.play(track);
@@ -202,7 +202,7 @@ class PlayerTest {
     @DisplayName("Should change the active device")
     public void testChangeActiveDevice() {
       final var player = new Player(testPlayerId, testPlayerName, false, testDevice, testTrack);
-      final var device = new Device(new DeviceId("device:12345"), "New", true, testTrack);
+      final var device = new Device(new EntityId("device:12345"), "New", true, testTrack);
 
       final var playerWithNewDevice = player.playOn(device);
 

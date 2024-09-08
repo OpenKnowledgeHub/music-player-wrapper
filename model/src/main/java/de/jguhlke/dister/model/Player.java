@@ -5,10 +5,10 @@ import de.jguhlke.dister.model.exception.DisterException;
 import java.util.Objects;
 
 public record Player(
-    PlayerId id, String name, boolean playing, Device activeDevice, Track currentTrack) {
+    EntityId id, String name, boolean playing, Device activeDevice, Track currentTrack) {
 
   public Player {
-    Objects.requireNonNull(id, "'playerId' must be set");
+    Objects.requireNonNull(id, "'id' must be set");
     Objects.requireNonNull(name, "'name' must be set");
 
     if (name.isBlank()) {
@@ -73,5 +73,18 @@ public record Player(
     }
 
     return new Player(id, name, playing, device, currentTrack);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Player player = (Player) o;
+    return Objects.equals(id, player.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id);
   }
 }
