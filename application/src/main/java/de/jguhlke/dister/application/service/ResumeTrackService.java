@@ -7,17 +7,19 @@ import de.jguhlke.dister.model.Player;
 import de.jguhlke.dister.model.id.PlayerId;
 import java.util.Objects;
 
-public class ResumeTrackImpl implements ResumeTrack {
+public class ResumeTrackService implements ResumeTrack {
 
   private final MusicSystemPort musicSystemPort;
 
-  public ResumeTrackImpl(MusicSystemPort musicSystemPort) {
+  public ResumeTrackService(MusicSystemPort musicSystemPort) {
     this.musicSystemPort = musicSystemPort;
   }
 
   @Override
   public Player resumeTrack(PlayerId playerId, Authentication authentication) {
-    Objects.requireNonNull(playerId, "playerId must be set");
+    Objects.requireNonNull(playerId, "'playerId' must be set");
+    Objects.requireNonNull(authentication, "'authentication' must be set");
+
     return musicSystemPort.resumeTrackById(playerId, authentication);
   }
 }
