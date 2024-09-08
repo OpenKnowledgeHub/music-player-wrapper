@@ -17,7 +17,7 @@ class PlayerTest {
   final EntityId testTrackId = new EntityId("track:123");
   final Track testTrack = new Track(testTrackId, "Song");
   final EntityId testDeviceId = new EntityId("device:123");
-  final Device testDevice = new Device(testDeviceId, "Kitchen Bar", true, testTrack);
+  final Device testDevice = new Device(testDeviceId, "Kitchen Bar", true);
 
   @Nested
   @DisplayName("Test Player creation")
@@ -202,7 +202,7 @@ class PlayerTest {
     @DisplayName("Should change the active device")
     public void testChangeActiveDevice() {
       final var player = new Player(testPlayerId, testPlayerName, false, testDevice, testTrack);
-      final var device = new Device(new EntityId("device:12345"), "New", true, testTrack);
+      final var device = new Device(new EntityId("device:12345"), "New", true);
 
       final var playerWithNewDevice = player.playOn(device);
 
