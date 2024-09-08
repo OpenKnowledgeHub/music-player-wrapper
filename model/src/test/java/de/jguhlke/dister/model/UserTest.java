@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.jguhlke.dister.model.exception.DisterException;
+import de.jguhlke.dister.model.id.UserId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class UserTest {
 
   final String testUserName = "Hello";
-  final EntityId testUserId = new EntityId("User:1234");
+  final UserId testUserId = new UserId("User:1234");
 
   @Nested
   @DisplayName("Test User creation")
@@ -58,8 +59,8 @@ class UserTest {
     @Test
     @DisplayName("Should be equal and same hash code with same id")
     public void testEquals() {
-      final var userOne = new User(new EntityId("User:1234"), testUserName);
-      final var userTwo = new User(new EntityId("User:1234"), testUserName + "2");
+      final var userOne = new User(new UserId("User:1234"), testUserName);
+      final var userTwo = new User(new UserId("User:1234"), testUserName + "2");
 
       assertThat(userOne).isEqualTo(userTwo);
       assertThat(userOne.hashCode()).isEqualTo(userTwo.hashCode());
@@ -68,8 +69,8 @@ class UserTest {
     @Test
     @DisplayName("Should not be equal and differ hash code with different id")
     public void testNotEquals() {
-      final var userOne = new User(new EntityId("User:1234"), testUserName);
-      final var userTwo = new User(new EntityId("User:4567"), testUserName);
+      final var userOne = new User(new UserId("User:1234"), testUserName);
+      final var userTwo = new User(new UserId("User:4567"), testUserName);
 
       assertThat(userOne).isNotEqualTo(userTwo);
       assertThat(userOne.hashCode()).isNotEqualTo(userTwo.hashCode());

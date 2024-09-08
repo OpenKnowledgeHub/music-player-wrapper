@@ -1,11 +1,12 @@
 package de.jguhlke.dister.model;
 
 import de.jguhlke.dister.model.exception.DisterException;
+import de.jguhlke.dister.model.id.PlayerId;
 
 import java.util.Objects;
 
 public record Player(
-    EntityId id, String name, boolean playing, Device activeDevice, Track currentTrack) {
+        PlayerId id, String name, boolean playing, Device activeDevice, Track currentTrack) {
 
   public Player {
     Objects.requireNonNull(id, "'id' must be set");

@@ -1,6 +1,7 @@
 package de.jguhlke.dister.model;
 
 import de.jguhlke.dister.model.exception.DisterException;
+import de.jguhlke.dister.model.id.DeviceId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DisplayName("Test Device entity")
 class DeviceTest {
 
-  final EntityId testDeviceId = new EntityId("device:1234");
+  final DeviceId testDeviceId = new DeviceId("device:1234");
   final String testDeviceName = "Kitchen";
 
   @Nested
@@ -59,8 +60,8 @@ class DeviceTest {
     @Test
     @DisplayName("Should be equal and same hash code with same id")
     public void testEquals() {
-      final var deviceOne = new Device(new EntityId("device:1234"), testDeviceName, true);
-      final var deviceTwo = new Device(new EntityId("device:1234"), testDeviceName + "2", false);
+      final var deviceOne = new Device(new DeviceId("device:1234"), testDeviceName, true);
+      final var deviceTwo = new Device(new DeviceId("device:1234"), testDeviceName + "2", false);
 
       assertThat(deviceOne).isEqualTo(deviceTwo);
       assertThat(deviceOne.hashCode()).isEqualTo(deviceTwo.hashCode());
@@ -69,8 +70,8 @@ class DeviceTest {
     @Test
     @DisplayName("Should not be equal and differ hash code with different id")
     public void testNotEquals() {
-      final var deviceOne = new Device(new EntityId("device:1234"), testDeviceName, true);
-      final var deviceTwo = new Device(new EntityId("device:12345"), testDeviceName, true);
+      final var deviceOne = new Device(new DeviceId("device:1234"), testDeviceName, true);
+      final var deviceTwo = new Device(new DeviceId("device:12345"), testDeviceName, true);
 
       assertThat(deviceOne).isNotEqualTo(deviceTwo);
       assertThat(deviceOne.hashCode()).isNotEqualTo(deviceTwo.hashCode());

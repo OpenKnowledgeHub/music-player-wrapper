@@ -1,9 +1,11 @@
 package de.jguhlke.dister.model;
 
 import de.jguhlke.dister.model.exception.DisterException;
+import de.jguhlke.dister.model.id.UserId;
+
 import java.util.Objects;
 
-public record User(EntityId id, String name) {
+public record User(UserId id, String name) {
   public User {
     Objects.requireNonNull(id, "'id' must be set");
     Objects.requireNonNull(name, "'name' must be set");

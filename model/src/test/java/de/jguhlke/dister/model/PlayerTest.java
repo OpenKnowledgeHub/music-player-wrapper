@@ -1,6 +1,9 @@
 package de.jguhlke.dister.model;
 
 import de.jguhlke.dister.model.exception.DisterException;
+import de.jguhlke.dister.model.id.DeviceId;
+import de.jguhlke.dister.model.id.PlayerId;
+import de.jguhlke.dister.model.id.TrackId;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,10 +16,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class PlayerTest {
 
   final String testPlayerName = "player";
-  final EntityId testPlayerId = new EntityId("player:123");
-  final EntityId testTrackId = new EntityId("track:123");
+  final PlayerId testPlayerId = new PlayerId("player:123");
+  final TrackId testTrackId = new TrackId("track:123");
   final Track testTrack = new Track(testTrackId, "Song");
-  final EntityId testDeviceId = new EntityId("device:123");
+  final DeviceId testDeviceId = new DeviceId("device:123");
   final Device testDevice = new Device(testDeviceId, "Kitchen Bar", true);
 
   @Nested
@@ -83,7 +86,7 @@ class PlayerTest {
     @DisplayName("Should play a track")
     public void testPlay() {
       final var player = new Player(testPlayerId, testPlayerName, false, testDevice, null);
-      final var trackId = new EntityId("track:456");
+      final var trackId = new TrackId("track:456");
       final var track = new Track(trackId, "New Song");
 
       final var playingPlayer = player.play(track);
@@ -202,7 +205,7 @@ class PlayerTest {
     @DisplayName("Should change the active device")
     public void testChangeActiveDevice() {
       final var player = new Player(testPlayerId, testPlayerName, false, testDevice, testTrack);
-      final var device = new Device(new EntityId("device:12345"), "New", true);
+      final var device = new Device(new DeviceId("device:12345"), "New", true);
 
       final var playerWithNewDevice = player.playOn(device);
 
@@ -236,14 +239,14 @@ class PlayerTest {
     @DisplayName("Should be equal and same hash code with same id")
     public void testEquals() {
       final var playerOne =
-          new Player(new EntityId("player:1234"), testPlayerName, true, testDevice, testTrack);
+          new Player(new PlayerId("player:1234"), testPlayerName, true, testDevice, testTrack);
       final var playerTwo =
           new Player(
-              new EntityId("player:1234"),
+              new PlayerId("player:1234"),
               testPlayerName + "2",
               false,
-              new Device(new EntityId("device:4567"), "Device", true),
-              new Track(new EntityId("entity:789"), "Track"));
+              new Device(new DeviceId("device:4567"), "Device", true),
+              new Track(new TrackId("entity:789"), "Track"));
 
       assertThat(playerOne).isEqualTo(playerTwo);
       assertThat(playerOne.hashCode()).isEqualTo(playerTwo.hashCode());
@@ -253,9 +256,9 @@ class PlayerTest {
     @DisplayName("Should not be equal and differ hash code with different id")
     public void testNotEquals() {
       final var playerOne =
-          new Player(new EntityId("player:1234"), testPlayerName, true, testDevice, testTrack);
+          new Player(new PlayerId("player:1234"), testPlayerName, true, testDevice, testTrack);
       final var playerTwo =
-          new Player(new EntityId("player:4567"), testPlayerName, true, testDevice, testTrack);
+          new Player(new PlayerId("player:4567"), testPlayerName, true, testDevice, testTrack);
 
       assertThat(playerOne).isNotEqualTo(playerTwo);
       assertThat(playerOne.hashCode()).isNotEqualTo(playerTwo.hashCode());

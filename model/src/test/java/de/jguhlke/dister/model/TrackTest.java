@@ -1,6 +1,7 @@
 package de.jguhlke.dister.model;
 
 import de.jguhlke.dister.model.exception.DisterException;
+import de.jguhlke.dister.model.id.TrackId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class TrackTest {
 
   final String testTrackName = "Hello";
-  final EntityId testTrackId = new EntityId("track:1234");
+  final TrackId testTrackId = new TrackId("track:1234");
 
   @Nested
   @DisplayName("Test Track creation")
@@ -58,8 +59,8 @@ class TrackTest {
     @Test
     @DisplayName("Should be equal and same hash code with same id")
     public void testEquals() {
-      final var trackOne = new Track(new EntityId("track:1234"), testTrackName);
-      final var trackTwo = new Track(new EntityId("track:1234"), testTrackName + "2");
+      final var trackOne = new Track(new TrackId("track:1234"), testTrackName);
+      final var trackTwo = new Track(new TrackId("track:1234"), testTrackName + "2");
 
       assertThat(trackOne).isEqualTo(trackTwo);
       assertThat(trackOne.hashCode()).isEqualTo(trackTwo.hashCode());
@@ -68,8 +69,8 @@ class TrackTest {
     @Test
     @DisplayName("Should not be equal and differ hash code with different id")
     public void testNotEquals() {
-      final var trackOne = new Track(new EntityId("track:1234"), testTrackName);
-      final var trackTwo = new Track(new EntityId("track:4567"), testTrackName);
+      final var trackOne = new Track(new TrackId("track:1234"), testTrackName);
+      final var trackTwo = new Track(new TrackId("track:4567"), testTrackName);
 
       assertThat(trackOne).isNotEqualTo(trackTwo);
       assertThat(trackOne.hashCode()).isNotEqualTo(trackTwo.hashCode());
