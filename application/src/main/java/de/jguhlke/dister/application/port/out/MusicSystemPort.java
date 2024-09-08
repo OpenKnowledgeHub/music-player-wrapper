@@ -9,4 +9,6 @@ public interface MusicSystemPort {
   Player playTrackById(TrackId trackId, PlayerId playerId, Authentication authentication);
 
   Player resumeTrackById(PlayerId playerId, Authentication authentication);
+
+  Player pauseTrackById(PlayerId playerId, Authentication authentication);
 }
