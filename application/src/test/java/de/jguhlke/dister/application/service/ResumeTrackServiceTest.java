@@ -19,7 +19,6 @@ import de.jguhlke.dister.model.TokenAuthentication;
 import de.jguhlke.dister.model.Track;
 import de.jguhlke.dister.model.exception.DisterException;
 import de.jguhlke.dister.model.id.DeviceId;
-import de.jguhlke.dister.model.id.PlayerId;
 import de.jguhlke.dister.model.id.TrackId;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -39,65 +38,49 @@ class ResumeTrackServiceTest {
   @InjectMocks ResumeTrackService underTest;
 
   final TrackId testTrackId = new TrackId("track:1234");
-  final PlayerId testPlayerId = new PlayerId("player:1234");
   final Authentication testAuthentication = new TokenAuthentication("123456789");
   final Device testDevice = new Device(new DeviceId("device:1234"), "Device", true);
   final Track testTrack = new Track(testTrackId, "Track");
 
   @Test
   @DisplayName("Should resume a track on player by id")
-  public void testResumeTrackOnPlayer() {
-    final var player = new Player(testPlayerId, "Player", false, testDevice, testTrack);
+  public void testResumeOnPlayer() {
+    final var player = new Player(false, testDevice, testTrack);
 
-    doReturn(Optional.of(player))
-        .when(playerRepository)
-        .findPlayerById(testPlayerId, testAuthentication);
+    doReturn(Optional.of(player)).when(playerRepository).fetchCurrentPlayer(testAuthentication);
 
     doAnswer(it -> it.getArguments()[0])
         .when(musicSystem)
         .produceState(any(Player.class), any(Authentication.class));
 
-    final var pausedPlayer = underTest.resumeTrack(testPlayerId, testAuthentication);
+    final var pausedPlayer = underTest.resume(testAuthentication);
 
     assertThat(pausedPlayer).isNotNull();
     assertThat(pausedPlayer.playing()).isTrue();
     assertThat(pausedPlayer.currentTrack().id()).isEqualTo(testTrackId);
-    assertThat(pausedPlayer.id()).isEqualTo(testPlayerId);
 
-    verify(playerRepository, times(1)).findPlayerById(testPlayerId, testAuthentication);
+    verify(playerRepository, times(1)).fetchCurrentPlayer(testAuthentication);
     verify(musicSystem, times(1)).produceState(any(Player.class), any(Authentication.class));
     verifyNoMoreInteractions(musicSystem, playerRepository);
   }
 
   @Test
   @DisplayName("Should not resume a track on player if player not found")
-  public void testResumeTrackOnPlayerNotFoundPlayer() {
-    doReturn(Optional.empty())
-        .when(playerRepository)
-        .findPlayerById(testPlayerId, testAuthentication);
+  public void testResumeOnPlayerNotFoundPlayer() {
+    doReturn(Optional.empty()).when(playerRepository).fetchCurrentPlayer(testAuthentication);
 
-    assertThatThrownBy(() -> underTest.resumeTrack(testPlayerId, testAuthentication))
+    assertThatThrownBy(() -> underTest.resume(testAuthentication))
         .isInstanceOf(DisterException.class)
-        .hasMessage(String.format("No player for id (%s) found!", testPlayerId));
+        .hasMessage("No current player found!");
 
-    verify(playerRepository, times(1)).findPlayerById(testPlayerId, testAuthentication);
+    verify(playerRepository, times(1)).fetchCurrentPlayer(testAuthentication);
     verifyNoMoreInteractions(musicSystem, playerRepository);
   }
 
   @Test
-  @DisplayName("Should not resume a track on player if playerId is null")
-  public void testResumeTrackOnPlayerWithoutTrackId() {
-    assertThatThrownBy(() -> underTest.resumeTrack(null, testAuthentication))
-        .isInstanceOf(NullPointerException.class)
-        .hasMessage("'playerId' must be set");
-
-    verifyNoInteractions(musicSystem);
-  }
-
-  @Test
   @DisplayName("Should not resume a track on player if authentication is null")
-  public void testResumeTrackOnPlayerWithoutAuthentication() {
-    assertThatThrownBy(() -> underTest.resumeTrack(testPlayerId, null))
+  public void testResumeOnPlayerWithoutAuthentication() {
+    assertThatThrownBy(() -> underTest.resume(null))
         .isInstanceOf(NullPointerException.class)
         .hasMessage("'authentication' must be set");
 

@@ -19,7 +19,6 @@ import de.jguhlke.dister.model.TokenAuthentication;
 import de.jguhlke.dister.model.Track;
 import de.jguhlke.dister.model.exception.DisterException;
 import de.jguhlke.dister.model.id.DeviceId;
-import de.jguhlke.dister.model.id.PlayerId;
 import de.jguhlke.dister.model.id.TrackId;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -40,65 +39,53 @@ class PauseTrackServiceTest {
   @InjectMocks PauseTrackService underTest;
 
   final TrackId testTrackId = new TrackId("track:1234");
-  final PlayerId testPlayerId = new PlayerId("player:1234");
   final Authentication testAuthentication = new TokenAuthentication("123456789");
   final Device testDevice = new Device(new DeviceId("device:1234"), "Device", true);
   final Track testTrack = new Track(testTrackId, "Track");
 
   @Test
   @DisplayName("Should pause a track on player by id")
-  public void testPauseTrackOnPlayer() {
-    final var player = new Player(testPlayerId, "Player", true, testDevice, testTrack);
+  public void testPauseOnPlayer() {
+    final var player = new Player(true, testDevice, testTrack);
 
     doReturn(Optional.of(player))
         .when(playerRepository)
-        .findPlayerById(testPlayerId, testAuthentication);
+        .fetchCurrentPlayer(testAuthentication);
 
     doAnswer(it -> it.getArguments()[0])
         .when(musicSystem)
         .produceState(any(Player.class), any(Authentication.class));
 
-    final var pausedPlayer = underTest.pauseTrack(testPlayerId, testAuthentication);
+    final var pausedPlayer = underTest.pause(testAuthentication);
 
     assertThat(pausedPlayer).isNotNull();
     assertThat(pausedPlayer.playing()).isFalse();
     assertThat(pausedPlayer.currentTrack().id()).isEqualTo(testTrackId);
-    assertThat(pausedPlayer.id()).isEqualTo(testPlayerId);
 
-    verify(playerRepository, times(1)).findPlayerById(testPlayerId, testAuthentication);
+    verify(playerRepository, times(1)).fetchCurrentPlayer(testAuthentication);
     verify(musicSystem, times(1)).produceState(any(Player.class), any(Authentication.class));
     verifyNoMoreInteractions(musicSystem, playerRepository);
   }
 
   @Test
   @DisplayName("Should not pause a track on player if player not found")
-  public void testPauseTrackOnPlayerNotFoundPlayer() {
+  public void testPauseOnPlayerNotFoundPlayer() {
     doReturn(Optional.empty())
         .when(playerRepository)
-        .findPlayerById(testPlayerId, testAuthentication);
+        .fetchCurrentPlayer(testAuthentication);
 
-    assertThatThrownBy(() -> underTest.pauseTrack(testPlayerId, testAuthentication))
+    assertThatThrownBy(() -> underTest.pause(testAuthentication))
         .isInstanceOf(DisterException.class)
-        .hasMessage(String.format("No player for id (%s) found!", testPlayerId));
+        .hasMessage("No current player found!");
 
-    verify(playerRepository, times(1)).findPlayerById(testPlayerId, testAuthentication);
+    verify(playerRepository, times(1)).fetchCurrentPlayer(testAuthentication);
     verifyNoMoreInteractions(musicSystem, playerRepository);
   }
 
   @Test
-  @DisplayName("Should not pause a track on player if playerId is null")
-  public void testPauseTrackOnPlayerWithoutTrackId() {
-    assertThatThrownBy(() -> underTest.pauseTrack(null, testAuthentication))
-        .isInstanceOf(NullPointerException.class)
-        .hasMessage("'playerId' must be set");
-
-    verifyNoInteractions(musicSystem);
-  }
-
-  @Test
   @DisplayName("Should not pause a track on player if authentication is null")
-  public void testPauseTrackOnPlayerWithoutAuthentication() {
-    assertThatThrownBy(() -> underTest.pauseTrack(testPlayerId, null))
+  public void testPauseOnPlayerWithoutAuthentication() {
+    assertThatThrownBy(() -> underTest.pause(null))
         .isInstanceOf(NullPointerException.class)
         .hasMessage("'authentication' must be set");
 

@@ -1,21 +1,11 @@
 package de.jguhlke.dister.model;
 
 import de.jguhlke.dister.model.exception.DisterException;
-import de.jguhlke.dister.model.id.PlayerId;
-
 import java.util.Objects;
 
-public record Player(
-        PlayerId id, String name, boolean playing, Device activeDevice, Track currentTrack) {
+public record Player(boolean playing, Device activeDevice, Track currentTrack) {
 
   public Player {
-    Objects.requireNonNull(id, "'id' must be set");
-    Objects.requireNonNull(name, "'name' must be set");
-
-    if (name.isBlank()) {
-      throw new DisterException("'name' must not be blank");
-    }
-
     if (playing && Objects.isNull(activeDevice)) {
       throw new DisterException("'playing' cannot be true without active device");
     }
@@ -32,7 +22,7 @@ public record Player(
       throw new DisterException("It is not allowed to play a track without an active device");
     }
 
-    return new Player(id, name, true, activeDevice, track);
+    return new Player(true, activeDevice, track);
   }
 
   public Player stop() {
@@ -48,7 +38,7 @@ public record Player(
       throw new DisterException("It is not allowed to stop a not running track");
     }
 
-    return new Player(id, name, false, activeDevice, currentTrack);
+    return new Player(false, activeDevice, currentTrack);
   }
 
   public Player resume() {
@@ -64,7 +54,7 @@ public record Player(
       throw new DisterException("It is not allowed to resume a running track");
     }
 
-    return new Player(id, name, true, activeDevice, currentTrack);
+    return new Player(true, activeDevice, currentTrack);
   }
 
   public Player playOn(Device device) {
@@ -73,19 +63,6 @@ public record Player(
       return stop().playOn(null);
     }
 
-    return new Player(id, name, playing, device, currentTrack);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    Player player = (Player) o;
-    return Objects.equals(id, player.id);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(id);
+    return new Player(playing, device, currentTrack);
   }
 }

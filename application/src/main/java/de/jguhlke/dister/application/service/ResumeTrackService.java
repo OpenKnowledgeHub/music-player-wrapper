@@ -6,7 +6,6 @@ import de.jguhlke.dister.application.port.out.PlayerRepository;
 import de.jguhlke.dister.model.Authentication;
 import de.jguhlke.dister.model.Player;
 import de.jguhlke.dister.model.exception.DisterException;
-import de.jguhlke.dister.model.id.PlayerId;
 import java.util.Objects;
 
 public class ResumeTrackService implements ResumeTrack {
@@ -20,15 +19,14 @@ public class ResumeTrackService implements ResumeTrack {
   }
 
   @Override
-  public Player resumeTrack(PlayerId playerId, Authentication authentication) {
-    Objects.requireNonNull(playerId, "'playerId' must be set");
+  public Player resume(Authentication authentication) {
     Objects.requireNonNull(authentication, "'authentication' must be set");
 
     Player player =
         playerRepository
-            .findPlayerById(playerId, authentication)
+            .fetchCurrentPlayer(authentication)
             .orElseThrow(
-                () -> new DisterException(String.format("No player for id (%s) found!", playerId)));
+                    () -> new DisterException("No current player found!"));
 
     return musicSystem.produceState(player.resume(), authentication);
   }
