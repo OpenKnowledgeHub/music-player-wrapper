@@ -25,8 +25,7 @@ public class ResumeTrackService implements ResumeTrack {
     Player player =
         playerRepository
             .fetchCurrentPlayer(authentication)
-            .orElseThrow(
-                    () -> new DisterException("No current player found!"));
+            .orElseThrow(() -> new DisterException("No current player found!"));
 
     return musicSystem.produceState(player.resume(), authentication);
   }

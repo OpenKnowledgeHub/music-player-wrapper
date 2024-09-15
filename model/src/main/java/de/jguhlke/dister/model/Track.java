@@ -2,7 +2,6 @@ package de.jguhlke.dister.model;
 
 import de.jguhlke.dister.model.exception.DisterException;
 import de.jguhlke.dister.model.id.TrackId;
-
 import java.util.Objects;
 
 public record Track(TrackId id, String name) {

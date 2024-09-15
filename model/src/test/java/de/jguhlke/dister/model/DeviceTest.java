@@ -1,13 +1,13 @@
 package de.jguhlke.dister.model;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import de.jguhlke.dister.model.exception.DisterException;
 import de.jguhlke.dister.model.id.DeviceId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Test Device entity")
 class DeviceTest {

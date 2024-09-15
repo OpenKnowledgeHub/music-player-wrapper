@@ -38,8 +38,7 @@ class PlayTrackServiceTest {
 
   @Mock TrackRepository trackRepository;
 
-  @InjectMocks
-  PlayTrackService underTest;
+  @InjectMocks PlayTrackService underTest;
 
   final TrackId testTrackId = new TrackId("track:1234");
   final Authentication testAuthentication = new TokenAuthentication("123456789");

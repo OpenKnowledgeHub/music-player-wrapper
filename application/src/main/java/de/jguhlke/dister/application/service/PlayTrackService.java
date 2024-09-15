@@ -32,8 +32,7 @@ public class PlayTrackService implements PlayTrack {
     Player player =
         playerRepository
             .fetchCurrentPlayer(authentication)
-            .orElseThrow(
-                () -> new DisterException("No current player found!"));
+            .orElseThrow(() -> new DisterException("No current player found!"));
 
     Track track =
         trackRepository

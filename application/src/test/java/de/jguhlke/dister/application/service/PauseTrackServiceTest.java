@@ -48,9 +48,7 @@ class PauseTrackServiceTest {
   public void testPauseOnPlayer() {
     final var player = new Player(true, testDevice, testTrack);
 
-    doReturn(Optional.of(player))
-        .when(playerRepository)
-        .fetchCurrentPlayer(testAuthentication);
+    doReturn(Optional.of(player)).when(playerRepository).fetchCurrentPlayer(testAuthentication);
 
     doAnswer(it -> it.getArguments()[0])
         .when(musicSystem)
@@ -70,9 +68,7 @@ class PauseTrackServiceTest {
   @Test
   @DisplayName("Should not pause a track on player if player not found")
   public void testPauseOnPlayerNotFoundPlayer() {
-    doReturn(Optional.empty())
-        .when(playerRepository)
-        .fetchCurrentPlayer(testAuthentication);
+    doReturn(Optional.empty()).when(playerRepository).fetchCurrentPlayer(testAuthentication);
 
     assertThatThrownBy(() -> underTest.pause(testAuthentication))
         .isInstanceOf(DisterException.class)

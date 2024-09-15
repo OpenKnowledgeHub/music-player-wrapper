@@ -8,7 +8,7 @@ import QrCodeScanner from './components/QRCodeScanner.vue'
   </header>
 
   <main>
-    <QrCodeScanner />
+    <QrCodeScanner/>
   </main>
 </template>
 

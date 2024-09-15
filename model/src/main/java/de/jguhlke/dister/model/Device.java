@@ -2,7 +2,6 @@ package de.jguhlke.dister.model;
 
 import de.jguhlke.dister.model.exception.DisterException;
 import de.jguhlke.dister.model.id.DeviceId;
-
 import java.util.Objects;
 
 public record Device(DeviceId id, String name, boolean active) {
