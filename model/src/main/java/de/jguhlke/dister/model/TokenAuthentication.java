@@ -11,4 +11,9 @@ public record TokenAuthentication(String token) implements Authentication {
       throw new DisterException("'token' must not be blank");
     }
   }
+
+  @Override
+  public String getAuthentication() {
+    return token;
+  }
 }
