@@ -50,7 +50,7 @@ class PlayTrackServiceTest {
   public void testPlayPlayer() {
     final var trackId = new TrackId("track:5678");
     final var newTrack = new Track(trackId, "Track");
-    final var player = new Player(false, testDevice, testTrack);
+    final var player = new Player(false, false, testDevice, testTrack);
 
     doReturn(Optional.of(player)).when(playerRepository).fetchCurrentPlayer(testAuthentication);
 
@@ -66,6 +66,7 @@ class PlayTrackServiceTest {
 
     assertThat(playingPlayer).isNotNull();
     assertThat(playingPlayer.playing()).isTrue();
+    assertThat(playingPlayer.resumed()).isFalse();
     assertThat(playingPlayer.currentTrack()).isEqualTo(newTrack);
 
     verify(playerRepository, times(1)).fetchCurrentPlayer(testAuthentication);
@@ -93,7 +94,7 @@ class PlayTrackServiceTest {
   @DisplayName("Should not play a track on player if track not found")
   public void testPlayTrackOnPlayerNotFound() {
     final var trackId = new TrackId("track:5678");
-    final var player = new Player(false, testDevice, testTrack);
+    final var player = new Player(false, false, testDevice, testTrack);
 
     doReturn(Optional.of(player)).when(playerRepository).fetchCurrentPlayer(testAuthentication);
 

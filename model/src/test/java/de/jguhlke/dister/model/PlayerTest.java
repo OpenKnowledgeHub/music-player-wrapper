@@ -25,7 +25,7 @@ class PlayerTest {
     @Test
     @DisplayName("Should create a player")
     public void testCreate() {
-      final var player = new Player(false, testDevice, testTrack);
+      final var player = new Player(false, false, testDevice, testTrack);
 
       assertThat(player).isNotNull();
       assertThat(player.playing()).isFalse();
@@ -36,7 +36,7 @@ class PlayerTest {
     @Test
     @DisplayName("Should not create a playing player without device")
     public void testCreatePlayingWithoutDevice() {
-      assertThatThrownBy(() -> new Player(true, null, testTrack))
+      assertThatThrownBy(() -> new Player(true, false, null, testTrack))
           .isInstanceOf(DisterException.class)
           .hasMessage("'playing' cannot be true without active device");
     }
@@ -44,7 +44,7 @@ class PlayerTest {
     @Test
     @DisplayName("Should not create a playing player without track")
     public void testCreatePlayingWithoutTrack() {
-      assertThatThrownBy(() -> new Player(true, testDevice, null))
+      assertThatThrownBy(() -> new Player(true, false, testDevice, null))
           .isInstanceOf(DisterException.class)
           .hasMessage("'playing' cannot be true without current track");
     }
@@ -56,7 +56,7 @@ class PlayerTest {
     @Test
     @DisplayName("Should play a track")
     public void testPlay() {
-      final var player = new Player(false, testDevice, null);
+      final var player = new Player(false, false, testDevice, null);
       final var trackId = new TrackId("track:456");
       final var track = new Track(trackId, "New Song");
 
@@ -64,6 +64,7 @@ class PlayerTest {
 
       assertThat(playingPlayer).isNotNull();
       assertThat(playingPlayer.playing()).isTrue();
+      assertThat(playingPlayer.resumed()).isFalse();
       assertThat(playingPlayer.activeDevice()).isEqualTo(testDevice);
       assertThat(playingPlayer.currentTrack()).isEqualTo(track);
     }
@@ -71,7 +72,7 @@ class PlayerTest {
     @Test
     @DisplayName("Should not play a track without device")
     public void testPlayWithoutDevice() {
-      final var player = new Player(false, null, null);
+      final var player = new Player(false, false, null, null);
 
       Assertions.assertThatThrownBy(() -> player.play(testTrack))
           .isInstanceOf(DisterException.class)
@@ -81,7 +82,7 @@ class PlayerTest {
     @Test
     @DisplayName("Should not play a track without track")
     public void testPlayWithoutTrack() {
-      final var player = new Player(false, testDevice, null);
+      final var player = new Player(false, false, testDevice, null);
 
       Assertions.assertThatThrownBy(() -> player.play(null))
           .isInstanceOf(NullPointerException.class)
@@ -96,12 +97,13 @@ class PlayerTest {
     @Test
     @DisplayName("Should stop a track")
     public void testStop() {
-      final var player = new Player(true, testDevice, testTrack);
+      final var player = new Player(true, false, testDevice, testTrack);
 
       final var stoppedPlayer = player.stop();
 
       assertThat(stoppedPlayer).isNotNull();
       assertThat(stoppedPlayer.playing()).isFalse();
+      assertThat(stoppedPlayer.resumed()).isFalse();
       assertThat(stoppedPlayer.activeDevice()).isEqualTo(testDevice);
       assertThat(stoppedPlayer.currentTrack()).isEqualTo(testTrack);
     }
@@ -109,7 +111,7 @@ class PlayerTest {
     @Test
     @DisplayName("Should not stop a track without playing a track")
     public void testStopWithoutPlayingTrack() {
-      final var player = new Player(false, testDevice, testTrack);
+      final var player = new Player(false, false, testDevice, testTrack);
 
       Assertions.assertThatThrownBy(player::stop)
           .isInstanceOf(DisterException.class)
@@ -124,12 +126,13 @@ class PlayerTest {
     @Test
     @DisplayName("Should resume a track")
     public void testResume() {
-      final var player = new Player(false, testDevice, testTrack);
+      final var player = new Player(false, false, testDevice, testTrack);
 
       final var resumedPlayer = player.resume();
 
       assertThat(resumedPlayer).isNotNull();
       assertThat(resumedPlayer.playing()).isTrue();
+      assertThat(resumedPlayer.resumed()).isTrue();
       assertThat(resumedPlayer.activeDevice()).isEqualTo(testDevice);
       assertThat(resumedPlayer.currentTrack()).isEqualTo(testTrack);
     }
@@ -137,7 +140,7 @@ class PlayerTest {
     @Test
     @DisplayName("Should not resume a track without device")
     public void testResumeWithoutDevice() {
-      final var player = new Player(false, null, testTrack);
+      final var player = new Player(false, false, null, testTrack);
 
       Assertions.assertThatThrownBy(player::resume)
           .isInstanceOf(DisterException.class)
@@ -147,7 +150,7 @@ class PlayerTest {
     @Test
     @DisplayName("Should not resume a track without track")
     public void testResumeWithoutTrack() {
-      final var player = new Player(false, testDevice, null);
+      final var player = new Player(false, false, testDevice, null);
 
       Assertions.assertThatThrownBy(player::resume)
           .isInstanceOf(DisterException.class)
@@ -157,7 +160,7 @@ class PlayerTest {
     @Test
     @DisplayName("Should not resume a track with running track")
     public void testResumeWithRunningTrack() {
-      final var player = new Player(true, testDevice, testTrack);
+      final var player = new Player(true, false, testDevice, testTrack);
 
       Assertions.assertThatThrownBy(player::resume)
           .isInstanceOf(DisterException.class)
@@ -172,13 +175,14 @@ class PlayerTest {
     @Test
     @DisplayName("Should change the active device")
     public void testChangeActiveDevice() {
-      final var player = new Player(false, testDevice, testTrack);
+      final var player = new Player(false, false, testDevice, testTrack);
       final var device = new Device(new DeviceId("device:12345"), "New", true);
 
       final var playerWithNewDevice = player.playOn(device);
 
       assertThat(playerWithNewDevice).isNotNull();
       assertThat(playerWithNewDevice.playing()).isFalse();
+      assertThat(playerWithNewDevice.resumed()).isFalse();
       assertThat(playerWithNewDevice.activeDevice()).isEqualTo(device);
       assertThat(playerWithNewDevice.currentTrack()).isEqualTo(testTrack);
     }
@@ -186,13 +190,14 @@ class PlayerTest {
     @Test
     @DisplayName("Should disable active device")
     public void testChangeActiveDeviceWithoutNewDevice() {
-      final var player = new Player(true, testDevice, testTrack);
+      final var player = new Player(true, false, testDevice, testTrack);
       assertThat(player.playing()).isTrue();
 
       final var playerWithoutActiveDevice = player.playOn(null);
 
       assertThat(playerWithoutActiveDevice).isNotNull();
       assertThat(playerWithoutActiveDevice.playing()).isFalse();
+      assertThat(playerWithoutActiveDevice.resumed()).isFalse();
       assertThat(playerWithoutActiveDevice.activeDevice()).isNull();
       assertThat(playerWithoutActiveDevice.currentTrack()).isEqualTo(testTrack);
     }

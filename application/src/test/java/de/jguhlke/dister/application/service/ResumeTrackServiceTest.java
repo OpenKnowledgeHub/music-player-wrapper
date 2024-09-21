@@ -45,7 +45,7 @@ class ResumeTrackServiceTest {
   @Test
   @DisplayName("Should resume a track on player by id")
   public void testResumeOnPlayer() {
-    final var player = new Player(false, testDevice, testTrack);
+    final var player = new Player(false, false, testDevice, testTrack);
 
     doReturn(Optional.of(player)).when(playerRepository).fetchCurrentPlayer(testAuthentication);
 
@@ -53,11 +53,12 @@ class ResumeTrackServiceTest {
         .when(musicSystem)
         .produceState(any(Player.class), any(Authentication.class));
 
-    final var pausedPlayer = underTest.resume(testAuthentication);
+    final var resumedPlayer = underTest.resume(testAuthentication);
 
-    assertThat(pausedPlayer).isNotNull();
-    assertThat(pausedPlayer.playing()).isTrue();
-    assertThat(pausedPlayer.currentTrack().id()).isEqualTo(testTrackId);
+    assertThat(resumedPlayer).isNotNull();
+    assertThat(resumedPlayer.playing()).isTrue();
+    assertThat(resumedPlayer.resumed()).isTrue();
+    assertThat(resumedPlayer.currentTrack().id()).isEqualTo(testTrackId);
 
     verify(playerRepository, times(1)).fetchCurrentPlayer(testAuthentication);
     verify(musicSystem, times(1)).produceState(any(Player.class), any(Authentication.class));

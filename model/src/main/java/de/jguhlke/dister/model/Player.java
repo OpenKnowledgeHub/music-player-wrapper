@@ -3,7 +3,7 @@ package de.jguhlke.dister.model;
 import de.jguhlke.dister.model.exception.DisterException;
 import java.util.Objects;
 
-public record Player(boolean playing, Device activeDevice, Track currentTrack) {
+public record Player(boolean playing, boolean resumed, Device activeDevice, Track currentTrack) {
 
   public Player {
     if (playing && Objects.isNull(activeDevice)) {
@@ -22,7 +22,7 @@ public record Player(boolean playing, Device activeDevice, Track currentTrack) {
       throw new DisterException("It is not allowed to play a track without an active device");
     }
 
-    return new Player(true, activeDevice, track);
+    return new Player(true, false, activeDevice, track);
   }
 
   public Player stop() {
@@ -38,7 +38,7 @@ public record Player(boolean playing, Device activeDevice, Track currentTrack) {
       throw new DisterException("It is not allowed to stop a not running track");
     }
 
-    return new Player(false, activeDevice, currentTrack);
+    return new Player(false, false, activeDevice, currentTrack);
   }
 
   public Player resume() {
@@ -54,7 +54,7 @@ public record Player(boolean playing, Device activeDevice, Track currentTrack) {
       throw new DisterException("It is not allowed to resume a running track");
     }
 
-    return new Player(true, activeDevice, currentTrack);
+    return new Player(true, true, activeDevice, currentTrack);
   }
 
   public Player playOn(Device device) {
@@ -63,6 +63,6 @@ public record Player(boolean playing, Device activeDevice, Track currentTrack) {
       return stop().playOn(null);
     }
 
-    return new Player(playing, device, currentTrack);
+    return new Player(playing, resumed, device, currentTrack);
   }
 }

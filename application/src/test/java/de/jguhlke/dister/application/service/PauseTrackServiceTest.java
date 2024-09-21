@@ -46,7 +46,7 @@ class PauseTrackServiceTest {
   @Test
   @DisplayName("Should pause a track on player by id")
   public void testPauseOnPlayer() {
-    final var player = new Player(true, testDevice, testTrack);
+    final var player = new Player(true, false, testDevice, testTrack);
 
     doReturn(Optional.of(player)).when(playerRepository).fetchCurrentPlayer(testAuthentication);
 
@@ -58,6 +58,7 @@ class PauseTrackServiceTest {
 
     assertThat(pausedPlayer).isNotNull();
     assertThat(pausedPlayer.playing()).isFalse();
+    assertThat(pausedPlayer.resumed()).isFalse();
     assertThat(pausedPlayer.currentTrack().id()).isEqualTo(testTrackId);
 
     verify(playerRepository, times(1)).fetchCurrentPlayer(testAuthentication);
