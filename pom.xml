@@ -20,15 +20,16 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <junit-version>5.11.0</junit-version>
-        <assertj-version>3.26.3</assertj-version>
-        <mockito-version>5.13.0</mockito-version>
-        <jaxrs-version>4.0.0</jaxrs-version>
-        <picocli-version>4.7.6</picocli-version>
-        <maven-compiler-plugin-version>3.13.0</maven-compiler-plugin-version>
-        <maven-jar-plugin-version>3.4.2</maven-jar-plugin-version>
-        <native-maven-plugin-version>0.10.2</native-maven-plugin-version>
-        <jackson-version>2.17.2</jackson-version>
+        <junit.version>5.11.0</junit.version>
+        <assertj.version>3.26.3</assertj.version>
+        <mockito.version>5.13.0</mockito.version>
+        <jaxrs.version>4.0.0</jaxrs.version>
+        <picocli.version>4.7.6</picocli.version>
+        <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
+        <maven.jar.plugin.version>3.4.2</maven.jar.plugin.version>
+        <native.maven.plugin.version>0.10.2</native.maven.plugin.version>
+        <jackson.version>2.17.2</jackson.version>
+        <mockeserver.version>5.15.0</mockeserver.version>
     </properties>
 
     <dependencyManagement>
@@ -36,47 +37,53 @@
             <dependency>
                 <groupId>jakarta.ws.rs</groupId>
                 <artifactId>jakarta.ws.rs-api</artifactId>
-                <version>${jaxrs-version}</version>
+                <version>${jaxrs.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
-                <version>${picocli-version}</version>
+                <version>${picocli.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${jackson-version}</version>
+                <version>${jackson.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-api</artifactId>
-                <version>${junit-version}</version>
+                <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-engine</artifactId>
-                <version>${junit-version}</version>
+                <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
-                <version>${assertj-version}</version>
+                <version>${assertj.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>${mockito-version}</version>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-junit-jupiter</artifactId>
-                <version>${mockito-version}</version>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mock-server</groupId>
+                <artifactId>mockserver-client-java-no-dependencies</artifactId>
+                <version>${mockserver-version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -88,18 +95,18 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>${maven-jar-plugin-version}</version>
+                    <version>${maven.jar.plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven-compiler-plugin-version}</version>
+                    <version>${maven.compiler.plugin.version}</version>
                     <configuration>
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>info.picocli</groupId>
                                 <artifactId>picocli-codegen</artifactId>
-                                <version>${picocli-version}</version>
+                                <version>${picocli.version}</version>
                             </path>
                         </annotationProcessorPaths>
                         <compilerArgs>
