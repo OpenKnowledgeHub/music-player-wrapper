@@ -24,10 +24,11 @@ class SpotifyClient {
 
   private static final Logger LOG = Logger.getLogger(SpotifyClient.class.getName());
 
-  private static final String BASE_URL = "https://api.spotify.com/v1";
-  private static final String PLAYER_URL = BASE_URL + "/me/player";
-  private static final String TRACK_URL = BASE_URL + "/tracks";
-  private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
+  public static final String API_PLAYER_PATH = "/me/player";
+
+  private final String playerUrl;
+  private final String trackUrl;
+  private final HttpClient httpClient = HttpClient.newHttpClient();
 
   private final Authentication authentication;
   private final ObjectMapper objectMapper;
@@ -36,6 +37,14 @@ class SpotifyClient {
     this.authentication = authentication;
     this.objectMapper = new ObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    SpotifyConfiguration spotifyConfiguration = SpotifyConfiguration.getInstance();
+
+    String baseUrl =
+        "%s:%d/v1".formatted(spotifyConfiguration.getBaseUrl(), spotifyConfiguration.getPort());
+
+    playerUrl = baseUrl + API_PLAYER_PATH;
+    trackUrl = baseUrl + "/tracks";
   }
 
   void play(TrackId trackId, DeviceId deviceId) {
@@ -44,71 +53,40 @@ class SpotifyClient {
       trackUri = "spotify:track:" + trackUri;
     }
 
-    String jsonPutBody;
-
-    try {
-      jsonPutBody = objectMapper.writeValueAsString(new SpotifyPlayRequest(List.of(trackUri)));
-    } catch (JsonProcessingException exception) {
-      throw new SpotifyClientException(exception);
-    }
+    String jsonPutBody = mapObjectToJsonString(new SpotifyPlayRequest(List.of(trackUri)));
 
     HttpRequest request =
-        createPutRequestFor(
-            URI.create(PLAYER_URL + "/play?deviceId=" + deviceId.id()), jsonPutBody);
+        createPutRequestFor(URI.create(playerUrl + "/play?deviceId=" + deviceId.id()), jsonPutBody);
 
-    try {
-      HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-    } catch (IOException | InterruptedException exception) {
-      throw new SpotifyClientException(exception);
-    }
+    sendRequest(request);
   }
 
   void pause() {
-    HttpRequest request = createPutRequestFor(URI.create(PLAYER_URL + "/pause"));
+    HttpRequest request = createPutRequestFor(URI.create(playerUrl + "/pause"));
 
-    try {
-      HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-    } catch (IOException | InterruptedException exception) {
-      LOG.log(Level.SEVERE, exception.getMessage(), exception);
-      throw new SpotifyClientException(exception);
-    }
+    sendRequest(request);
   }
 
   void resume(DeviceId deviceId) {
     HttpRequest request =
-        createPutRequestFor(URI.create(PLAYER_URL + "/play?deviceId=" + deviceId.id()));
+        createPutRequestFor(URI.create(playerUrl + "/play?deviceId=" + deviceId.id()));
 
-    try {
-      HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-    } catch (IOException | InterruptedException exception) {
-      LOG.log(Level.SEVERE, exception.getMessage(), exception);
-      throw new SpotifyClientException(exception);
-    }
+    sendRequest(request);
   }
 
   Optional<Player> fetchCurrentPlayer() {
-    HttpRequest request =
-        HttpRequest.newBuilder()
-            .uri(URI.create(PLAYER_URL))
-            .header("Authorization", "Bearer " + authentication.getAuthentication())
-            .GET()
-            .build();
+    HttpRequest request = createGetRequestFor(URI.create(playerUrl));
 
-    HttpResponse<String> response;
-    try {
-      response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-    } catch (IOException | InterruptedException exception) {
-      LOG.log(Level.WARNING, exception.getMessage(), exception);
+    HttpResponse<String> response = sendRequest(request);
+
+    Optional<SpotifyPlayerResponse> optionalPlayerResponse =
+        mapJsonStringToObject(response.body(), SpotifyPlayerResponse.class);
+
+    if (optionalPlayerResponse.isEmpty()) {
       return Optional.empty();
     }
 
-    SpotifyPlayerResponse playerResponse;
-    try {
-      playerResponse = objectMapper.readValue(response.body(), SpotifyPlayerResponse.class);
-    } catch (JsonProcessingException exception) {
-      LOG.log(Level.WARNING, exception.getMessage(), exception);
-      return Optional.empty();
-    }
+    SpotifyPlayerResponse playerResponse = optionalPlayerResponse.get();
 
     return Optional.of(
         new Player(
@@ -124,28 +102,18 @@ class SpotifyClient {
   Optional<Track> fetchTrackById(TrackId trackId) {
     Objects.requireNonNull(trackId, "'trackId' must be set");
 
-    HttpRequest request =
-        HttpRequest.newBuilder()
-            .uri(URI.create(TRACK_URL + "/" + trackId.id()))
-            .header("Authorization", "Bearer " + authentication.getAuthentication())
-            .GET()
-            .build();
+    HttpRequest request = createGetRequestFor(URI.create(trackUrl + "/" + trackId.id()));
 
-    HttpResponse<String> response;
-    try {
-      response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-    } catch (IOException | InterruptedException exception) {
-      LOG.log(Level.WARNING, exception.getMessage(), exception);
+    HttpResponse<String> response = sendRequest(request);
+
+    Optional<SpotifyTrackResponse> optionalSpotifyTrackResponse =
+        mapJsonStringToObject(response.body(), SpotifyTrackResponse.class);
+
+    if (optionalSpotifyTrackResponse.isEmpty()) {
       return Optional.empty();
     }
 
-    SpotifyTrackResponse trackResponse;
-    try {
-      trackResponse = objectMapper.readValue(response.body(), SpotifyTrackResponse.class);
-    } catch (JsonProcessingException exception) {
-      LOG.log(Level.WARNING, exception.getMessage(), exception);
-      return Optional.empty();
-    }
+    SpotifyTrackResponse trackResponse = optionalSpotifyTrackResponse.get();
 
     return Optional.of(new Track(new TrackId(trackResponse.id()), trackResponse.name()));
   }
@@ -158,9 +126,38 @@ class SpotifyClient {
     return createBaseRequestBuilderFor(uri).PUT(HttpRequest.BodyPublishers.ofString(body)).build();
   }
 
+  private HttpRequest createGetRequestFor(URI uri) {
+    return createBaseRequestBuilderFor(uri).GET().build();
+  }
+
   private HttpRequest.Builder createBaseRequestBuilderFor(URI uri) {
     return HttpRequest.newBuilder()
         .uri(uri)
         .header("Authorization", "Bearer " + authentication.getAuthentication());
+  }
+
+  private HttpResponse<String> sendRequest(HttpRequest request) {
+    try {
+      return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    } catch (IOException | InterruptedException exception) {
+      throw new SpotifyClientException(exception);
+    }
+  }
+
+  private String mapObjectToJsonString(SpotifyPlayRequest value) {
+    try {
+      return objectMapper.writeValueAsString(value);
+    } catch (JsonProcessingException exception) {
+      throw new SpotifyClientException(exception);
+    }
+  }
+
+  private <T> Optional<T> mapJsonStringToObject(String jsonString, Class<T> targetClass) {
+    try {
+      return Optional.of(objectMapper.readValue(jsonString, targetClass));
+    } catch (JsonProcessingException exception) {
+      LOG.log(Level.WARNING, exception.getMessage(), exception);
+      return Optional.empty();
+    }
   }
 }
