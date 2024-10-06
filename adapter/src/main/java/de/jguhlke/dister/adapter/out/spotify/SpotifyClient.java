@@ -1,8 +1,12 @@
 package de.jguhlke.dister.adapter.out.spotify;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.jguhlke.dister.application.port.in.ExchangeTokenRequest;
+import de.jguhlke.dister.application.port.in.ExchangeTokenResponse;
 import de.jguhlke.dister.model.Authentication;
 import de.jguhlke.dister.model.Device;
 import de.jguhlke.dister.model.Player;
@@ -11,10 +15,13 @@ import de.jguhlke.dister.model.id.DeviceId;
 import de.jguhlke.dister.model.id.TrackId;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -28,17 +35,22 @@ class SpotifyClient {
 
   private final String playerUrl;
   private final String trackUrl;
+  private final SpotifyConfiguration spotifyConfiguration;
   private final HttpClient httpClient = HttpClient.newHttpClient();
 
-  private final Authentication authentication;
+  private Authentication authentication;
   private final ObjectMapper objectMapper;
 
   SpotifyClient(Authentication authentication) {
+    this();
     this.authentication = authentication;
+  }
+
+  SpotifyClient() {
     this.objectMapper = new ObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    SpotifyConfiguration spotifyConfiguration = SpotifyConfiguration.getInstance();
+    this.spotifyConfiguration = SpotifyConfiguration.getInstance();
 
     String baseUrl =
         "%s:%d/v1".formatted(spotifyConfiguration.getBaseUrl(), spotifyConfiguration.getPort());
@@ -118,6 +130,52 @@ class SpotifyClient {
     return Optional.of(new Track(new TrackId(trackResponse.id()), trackResponse.name()));
   }
 
+  ExchangeTokenResponse exchangeToken(ExchangeTokenRequest exchangeTokenRequest) {
+    Objects.requireNonNull(exchangeTokenRequest, "'exchangeTokenRequest' must be set");
+
+    Map<String, String> formParams =
+        Map.of(
+            "grant_type",
+            "authorization_code",
+            "code",
+            exchangeTokenRequest.code(),
+            "redirect_uri",
+            spotifyConfiguration.getClientRedirectUrl());
+
+    HttpRequest request =
+        HttpRequest.newBuilder()
+            .uri(URI.create(spotifyConfiguration.getClientTokenUrl()))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .header(
+                "Authorization",
+                "Basic "
+                    + Base64.getEncoder()
+                        .encodeToString(
+                            ("%s:%s"
+                                    .formatted(
+                                        spotifyConfiguration.getClientId(),
+                                        spotifyConfiguration.getClientSecret()))
+                                .getBytes()))
+            .POST(HttpRequest.BodyPublishers.ofString(mapFormDataAsString(formParams)))
+            .build();
+
+    HttpResponse<String> response = sendRequest(request);
+
+    Optional<SpotifyTokenResponse> optionalSpotifyTokenResponse =
+        mapJsonStringToObject(response.body(), SpotifyTokenResponse.class);
+
+    if (optionalSpotifyTokenResponse.isEmpty()) {
+      throw new SpotifyClientException("Token exchange could not be parsed");
+    }
+
+    SpotifyTokenResponse spotifyTokenResponse = optionalSpotifyTokenResponse.get();
+
+    return new ExchangeTokenResponse(
+        spotifyTokenResponse.access_token(),
+        spotifyTokenResponse.refresh_token(),
+        spotifyTokenResponse.expires_in());
+  }
+
   private HttpRequest createPutRequestFor(URI uri) {
     return createBaseRequestBuilderFor(uri).PUT(HttpRequest.BodyPublishers.noBody()).build();
   }
@@ -159,5 +217,23 @@ class SpotifyClient {
       LOG.log(Level.WARNING, exception.getMessage(), exception);
       return Optional.empty();
     }
+  }
+
+  private String mapFormDataAsString(Map<String, String> formData) {
+    Objects.requireNonNull(formData, "'formData' must be set");
+
+    StringBuilder mappedStringBuilder = new StringBuilder();
+
+    for (Map.Entry<String, String> formEntry : formData.entrySet()) {
+      if (!mappedStringBuilder.isEmpty()) {
+        mappedStringBuilder.append("&");
+      }
+
+      mappedStringBuilder.append(URLEncoder.encode(formEntry.getKey(), UTF_8));
+      mappedStringBuilder.append("=");
+      mappedStringBuilder.append(URLEncoder.encode(formEntry.getValue(), UTF_8));
+    }
+
+    return mappedStringBuilder.toString();
   }
 }

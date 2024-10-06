@@ -1,11 +1,20 @@
 package de.jguhlke.dister.adapter.out.spotify;
 
+import de.jguhlke.dister.application.port.in.ExchangeTokenRequest;
+import de.jguhlke.dister.application.port.in.ExchangeTokenResponse;
 import de.jguhlke.dister.application.port.out.MusicSystem;
 import de.jguhlke.dister.model.Authentication;
 import de.jguhlke.dister.model.Player;
 import java.util.Objects;
 
 public class SpotifyMusicSystem implements MusicSystem {
+
+  @Override
+  public ExchangeTokenResponse exchangeToken(ExchangeTokenRequest exchangeTokenRequest) {
+    SpotifyClient spotifyClient = new SpotifyClient();
+
+    return spotifyClient.exchangeToken(exchangeTokenRequest);
+  }
 
   @Override
   public Player produceState(Player player, Authentication authentication) {
