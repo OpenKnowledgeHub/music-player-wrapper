@@ -43,7 +43,7 @@ public class ControllerApplication extends Application {
     this.exchangeToken = new ExchangeTokenService(musicSystem);
 
     this.corsFilter = new CorsFilter();
-    this.corsFilter.getAllowedOrigins().add("*");
+    this.corsFilter.getAllowedOrigins().add(System.getenv("CORS_ORIGIN"));
   }
 
   @Override
