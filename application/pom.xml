@@ -5,18 +5,18 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>de.jguhlke</groupId>
-        <artifactId>dister</artifactId>
+        <artifactId>music-player-wrapper</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>de.jguhlke.dister</groupId>
+    <groupId>de.jguhlke.mpw</groupId>
     <artifactId>application</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>de.jguhlke.dister</groupId>
+            <groupId>de.jguhlke.mpw</groupId>
             <artifactId>model</artifactId>
-            <version>${project.version}</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
