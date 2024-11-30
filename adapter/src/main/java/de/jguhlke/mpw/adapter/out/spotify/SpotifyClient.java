@@ -5,6 +5,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.jguhlke.mpw.application.exception.AuthenticationException;
 import de.jguhlke.mpw.application.port.in.ExchangeTokenRequest;
 import de.jguhlke.mpw.application.port.in.ExchangeTokenResponse;
 import de.jguhlke.mpw.model.Authentication;
@@ -100,15 +101,23 @@ class SpotifyClient {
 
     SpotifyPlayerResponse playerResponse = optionalPlayerResponse.get();
 
-    return Optional.of(
-        new Player(
-            playerResponse.is_playing(),
-            false,
-            new Device(
-                new DeviceId(playerResponse.device().id()),
-                playerResponse.device().name(),
-                playerResponse.device().is_active()),
-            new Track(new TrackId(playerResponse.item().id()), playerResponse.item().name())));
+    Device device = null;
+
+    if (Objects.nonNull(playerResponse.device())) {
+      device =
+          new Device(
+              new DeviceId(playerResponse.device().id()),
+              playerResponse.device().name(),
+              playerResponse.device().is_active());
+    }
+
+    Track track = null;
+
+    if (Objects.nonNull(playerResponse.item())) {
+      track = new Track(new TrackId(playerResponse.item().id()), playerResponse.item().name());
+    }
+
+    return Optional.of(new Player(playerResponse.is_playing(), false, device, track));
   }
 
   Optional<Track> fetchTrackById(TrackId trackId) {
@@ -196,7 +205,21 @@ class SpotifyClient {
 
   private HttpResponse<String> sendRequest(HttpRequest request) {
     try {
-      return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+      HttpResponse<String> response =
+          httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+      if (response.statusCode() >= 200 && response.statusCode() < 300) {
+        return response;
+      }
+
+      if (response.statusCode() == 401 || response.statusCode() == 403) {
+        throw new AuthenticationException();
+      }
+
+      throw new SpotifyClientException(
+          "Unexpected status code %d occurred on request to %s "
+              .formatted(response.statusCode(), request.uri().toString()));
+
     } catch (IOException | InterruptedException exception) {
       throw new SpotifyClientException(exception);
     }

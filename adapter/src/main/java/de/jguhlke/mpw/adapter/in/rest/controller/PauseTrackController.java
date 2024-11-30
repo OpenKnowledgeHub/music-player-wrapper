@@ -1,5 +1,7 @@
-package de.jguhlke.mpw.adapter.in.rest;
+package de.jguhlke.mpw.adapter.in.rest.controller;
 
+import de.jguhlke.mpw.adapter.in.rest.model.TokenPostRequestBody;
+import de.jguhlke.mpw.application.exception.AuthenticationException;
 import de.jguhlke.mpw.application.port.in.PauseTrack;
 import de.jguhlke.mpw.model.Player;
 import de.jguhlke.mpw.model.TokenAuthentication;
@@ -23,7 +25,9 @@ public class PauseTrackController {
 
   @POST
   public Player pauseTrack(TokenPostRequestBody requestBody) {
-    Objects.requireNonNull(requestBody.token(), "'token' must be set");
+    if (Objects.isNull(requestBody.token()) || requestBody.token().isBlank()) {
+      throw new AuthenticationException();
+    }
 
     return pauseTrack.pause(new TokenAuthentication(requestBody.token()));
   }

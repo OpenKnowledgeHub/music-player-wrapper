@@ -1,5 +1,6 @@
 package de.jguhlke.mpw.application.service;
 
+import de.jguhlke.mpw.application.exception.NoActiveDeviceException;
 import de.jguhlke.mpw.application.port.in.ResumeTrack;
 import de.jguhlke.mpw.application.port.out.MusicSystem;
 import de.jguhlke.mpw.application.port.out.PlayerRepository;
@@ -26,6 +27,10 @@ public class ResumeTrackService implements ResumeTrack {
         playerRepository
             .fetchCurrentPlayer(authentication)
             .orElseThrow(() -> new MusicPlayerWrapperException("No current player found!"));
+
+    if (Objects.isNull(player.activeDevice())) {
+      throw new NoActiveDeviceException();
+    }
 
     return musicSystem.produceState(player.resume(), authentication);
   }

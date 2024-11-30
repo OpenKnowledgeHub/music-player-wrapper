@@ -1,5 +1,6 @@
 package de.jguhlke.mpw.application.service;
 
+import de.jguhlke.mpw.application.exception.NoActiveDeviceException;
 import de.jguhlke.mpw.application.port.in.PlayTrack;
 import de.jguhlke.mpw.application.port.out.MusicSystem;
 import de.jguhlke.mpw.application.port.out.PlayerRepository;
@@ -33,6 +34,10 @@ public class PlayTrackService implements PlayTrack {
         playerRepository
             .fetchCurrentPlayer(authentication)
             .orElseThrow(() -> new MusicPlayerWrapperException("No current player found!"));
+
+    if (Objects.isNull(player.activeDevice())) {
+      throw new NoActiveDeviceException();
+    }
 
     Track track =
         trackRepository

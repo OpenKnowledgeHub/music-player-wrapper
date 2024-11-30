@@ -1,5 +1,6 @@
-package de.jguhlke.mpw.adapter.in.rest;
+package de.jguhlke.mpw.adapter.in.rest.controller;
 
+import de.jguhlke.mpw.application.exception.InvalidClientInputException;
 import de.jguhlke.mpw.application.port.in.ExchangeToken;
 import de.jguhlke.mpw.application.port.in.ExchangeTokenRequest;
 import de.jguhlke.mpw.application.port.in.ExchangeTokenResponse;
@@ -23,7 +24,9 @@ public class ExchangeTokenController {
 
   @POST
   public ExchangeTokenResponse exchangeToken(ExchangeTokenRequest exchangeTokenRequest) {
-    Objects.requireNonNull(exchangeTokenRequest.code(), "'code' must be set");
+    if (Objects.isNull(exchangeTokenRequest.code()) || exchangeTokenRequest.code().isBlank()) {
+      throw new InvalidClientInputException("'code' must be set");
+    }
 
     return exchangeToken.exchangeToken(exchangeTokenRequest);
   }

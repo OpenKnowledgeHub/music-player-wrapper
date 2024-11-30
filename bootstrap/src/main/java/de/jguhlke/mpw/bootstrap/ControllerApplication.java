@@ -1,9 +1,14 @@
 package de.jguhlke.mpw.bootstrap;
 
-import de.jguhlke.mpw.adapter.in.rest.ExchangeTokenController;
-import de.jguhlke.mpw.adapter.in.rest.PauseTrackController;
-import de.jguhlke.mpw.adapter.in.rest.PlayTrackController;
-import de.jguhlke.mpw.adapter.in.rest.ResumeTrackController;
+import de.jguhlke.mpw.adapter.in.rest.controller.ExchangeTokenController;
+import de.jguhlke.mpw.adapter.in.rest.controller.PauseTrackController;
+import de.jguhlke.mpw.adapter.in.rest.controller.PlayTrackController;
+import de.jguhlke.mpw.adapter.in.rest.controller.ResumeTrackController;
+import de.jguhlke.mpw.adapter.in.rest.mapper.FallbackExceptionMapper;
+import de.jguhlke.mpw.adapter.in.rest.mapper.InvalidClientInputExceptionMapper;
+import de.jguhlke.mpw.adapter.in.rest.mapper.AuthenticationExceptionMapper;
+import de.jguhlke.mpw.adapter.in.rest.mapper.MusicPlayerWrapperExceptionMapper;
+import de.jguhlke.mpw.adapter.in.rest.mapper.NoActiveDeviceExceptionMapper;
 import de.jguhlke.mpw.adapter.out.spotify.SpotifyMusicSystem;
 import de.jguhlke.mpw.adapter.out.spotify.SpotifyPlayerRepository;
 import de.jguhlke.mpw.adapter.out.spotify.SpotifyTrackRepository;
@@ -53,6 +58,11 @@ public class ControllerApplication extends Application {
         new ExchangeTokenController(this.exchangeToken),
         new PlayTrackController(this.playTrack),
         new PauseTrackController(this.pauseTrack),
-        new ResumeTrackController(this.resumeTrack));
+        new ResumeTrackController(this.resumeTrack),
+        new NoActiveDeviceExceptionMapper(),
+        new AuthenticationExceptionMapper(),
+        new InvalidClientInputExceptionMapper(),
+        new MusicPlayerWrapperExceptionMapper(),
+        new FallbackExceptionMapper());
   }
 }

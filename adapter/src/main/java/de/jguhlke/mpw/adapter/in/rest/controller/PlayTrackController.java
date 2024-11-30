@@ -1,5 +1,8 @@
-package de.jguhlke.mpw.adapter.in.rest;
+package de.jguhlke.mpw.adapter.in.rest.controller;
 
+import de.jguhlke.mpw.adapter.in.rest.model.PlayTrackPostRequestBody;
+import de.jguhlke.mpw.application.exception.InvalidClientInputException;
+import de.jguhlke.mpw.application.exception.AuthenticationException;
 import de.jguhlke.mpw.application.port.in.PlayTrack;
 import de.jguhlke.mpw.model.Player;
 import de.jguhlke.mpw.model.TokenAuthentication;
@@ -24,8 +27,13 @@ public class PlayTrackController {
 
   @POST
   public Player playTrack(PlayTrackPostRequestBody requestBody) {
-    Objects.requireNonNull(requestBody.trackId(), "'trackId' must be set");
-    Objects.requireNonNull(requestBody.token(), "'token' must be set");
+    if (Objects.isNull(requestBody.token()) || requestBody.token().isBlank()) {
+      throw new AuthenticationException();
+    }
+
+    if (Objects.isNull(requestBody.trackId()) || requestBody.trackId().isBlank()) {
+      throw new InvalidClientInputException("'trackId' must be set");
+    }
 
     return playTrack.play(
         new TrackId(requestBody.trackId()), new TokenAuthentication(requestBody.token()));
